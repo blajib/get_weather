@@ -1,12 +1,16 @@
 #include "methods.h"
+#include "config.h"
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 
 WiFiClient wifi;
+JsonDocument doc;
+
 
 const char* ssid = "Freebox-3526DF";
 const char* password = "Californiadreamin8";
 const char* city = "nantes";
+int temperature = 0;
 
 void connection() {
     delay(1000);
@@ -31,7 +35,7 @@ void connection() {
     }
 }
 
-void get_weather(const String& city) {
+int get_weather(const String& city) {
     HttpClient client = HttpClient(wifi, "api.openweathermap.org", 80);
     
     String path = "/data/2.5/weather?q=" + city + "&units=metric&appid=c2cc673d2c9d85d09aa829beb6ba1b77";
@@ -41,7 +45,10 @@ void get_weather(const String& city) {
 
     int statusCode = client.responseStatusCode();
     String response = client.responseBody();
+    deserializeJson(doc,response);
 
-    Serial.println("Status Code: " + String(statusCode));
-    Serial.println("Response: " + response);
+    temperature = doc["main"]["temp"];
+    Serial.println("Température: " + temperature);
+
+    return temperature;
 }
